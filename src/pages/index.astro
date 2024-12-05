@@ -1,8 +1,9 @@
 ---
 import '../global.css';
+import { GithubTreeGenerator } from '@/components/github-tree-generator';
 ---
 
-<html lang="en">
+<html lang="en"class="dark">
 	<head>
 		<meta charset="utf-8" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -11,6 +12,6 @@ import '../global.css';
 		<title>Astro</title>
 	</head>
 	<body>
-		<h1>Astro</h1>
+		<GithubTreeGenerator client:load />
 	</body>
 </html>

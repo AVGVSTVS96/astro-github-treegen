@@ -139,6 +139,7 @@ export function GithubTreeGenerator() {
             type="url"
             placeholder="https://github.com/owner/repo"
             value={repoUrl}
+            className="bg-background"
             onChange={(e) => setRepoUrl(e.target.value)}
             required
           />
@@ -164,7 +165,8 @@ export function GithubTreeGenerator() {
       </form>
       {error && <p className="text-red-500 mt-4">{error}</p>}
       {tree && (
-        <pre className="mt-4 p-4 bg-gray-100 rounded overflow-x-auto">
+<pre className="mt-4 p-4 bg-gray-900 leading-[1.15rem] rounded overflow-x-auto">
+
           <code>{tree}</code>
         </pre>
       )}
