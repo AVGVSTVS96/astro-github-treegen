@@ -79,7 +79,10 @@ export function GithubTreeGenerator() {
     try {
       const url = new URL(repoUrl)
       const pathParts = url.pathname.split('/').filter(Boolean)
-      const [owner, repo] = pathParts
+      let [owner, repo] = pathParts
+      if (repo && repo.endsWith('.git')) {
+        repo = repo.replace(/\.git$/, '')
+      }
       if (!owner || !repo) {
         throw new Error('Invalid repository URL format.')
       }
