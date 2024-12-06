@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { fetchWithError } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -30,47 +31,12 @@ export function GithubTreeGenerator() {
   const [error, setError] = useState<string>('')
 
   const fetchRepoStructure = async (owner: string, repo: string): Promise<GitHubTreeResponse> => {
-    try {
-      // Fetch repository metadata to get the default branch
-      const repoResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}`)
-      if (!repoResponse.ok) {
-        throw new Error('Repository not found')
-      }
-      const repoData = await repoResponse.json()
-      const defaultBranch = repoData.default_branch
-
-      // Get the latest commit SHA of the default branch
-      const branchResponse = await fetch(
-        `https://api.github.com/repos/${owner}/${repo}/branches/${defaultBranch}`
-      )
-      if (!branchResponse.ok) {
-        throw new Error('Branch not found')
-      }
-      const branchData = await branchResponse.json()
-      const commitSha = branchData.commit.sha
-
-      // Get the commit object to retrieve the tree SHA
-      const commitResponse = await fetch(
-        `https://api.github.com/repos/${owner}/${repo}/git/commits/${commitSha}`
-      )
-      if (!commitResponse.ok) {
-        throw new Error('Commit not found')
-      }
-      const commitData = await commitResponse.json()
-      const treeSha = commitData.tree.sha
-
-      // Fetch the tree using the tree SHA
-      const treeResponse = await fetch(
-        `https://api.github.com/repos/${owner}/${repo}/git/trees/${treeSha}?recursive=1`
-      )
-      if (!treeResponse.ok) {
-        throw new Error('Tree not found')
-      }
-      return treeResponse.json()
-    } catch (error) {
-      console.error('Error fetching repository structure:', error)
-      throw new Error('Failed to fetch repository structure')
-    }
+    const repoData = await fetchWithError(`https://api.github.com/repos/${owner}/${repo}`, 'Repository not found');
+    const treeData = await fetchWithError(
+      `https://api.github.com/repos/${owner}/${repo}/git/trees/${repoData.default_branch}?recursive=1`,
+      'Tree not found'
+    );
+    return treeData;
   }
 
   const generateTree = (data: GitHubTreeResponse, maxDepth: number): string => {
@@ -165,8 +131,7 @@ export function GithubTreeGenerator() {
       </form>
       {error && <p className="text-red-500 mt-4">{error}</p>}
       {tree && (
-<pre className="mt-4 p-4 bg-gray-900 leading-[1.15rem] rounded overflow-x-auto">
-
+        <pre className="mt-4 p-4 bg-zinc-900 leading-snug rounded overflow-x-auto">
           <code>{tree}</code>
         </pre>
       )}
