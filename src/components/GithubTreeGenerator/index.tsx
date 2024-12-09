@@ -1,27 +1,9 @@
 import { useState } from 'react'
-import { fetchWithError } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-
-interface GitHubTreeItem {
-  path: string
-  mode: string
-  type: string
-  size?: number
-  sha: string
-  url: string
-}
-
-interface GitHubTreeResponse {
-  sha: string
-  url: string
-  tree: GitHubTreeItem[]
-  truncated: boolean
-}
-
-type TreeNode = { [key: string]: TreeNode }
+import { fetchRepoStructure, parseGitHubUrl, generateGitHubTreeStructure } from './github-tree-utils'
 
 export function GithubTreeGenerator() {
   const [repoUrl, setRepoUrl] = useState<string>('')
@@ -30,46 +12,6 @@ export function GithubTreeGenerator() {
   const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<string>('')
 
-  const fetchRepoStructure = async (owner: string, repo: string): Promise<GitHubTreeResponse> => {
-    const repoData = await fetchWithError(`https://api.github.com/repos/${owner}/${repo}`, 'Repository not found');
-    const treeData = await fetchWithError(
-      `https://api.github.com/repos/${owner}/${repo}/git/trees/${repoData.default_branch}?recursive=1`,
-      'Tree not found'
-    );
-    return treeData;
-  }
-
-  const generateTree = (data: GitHubTreeResponse, maxDepth: number): string => {
-    const tree: TreeNode = {}
-    data.tree.forEach((item: GitHubTreeItem) => {
-      const parts = item.path.split('/')
-      let current = tree
-      parts.forEach((part: string, index: number) => {
-        if (index < maxDepth) {
-          if (!current[part]) {
-            current[part] = {}
-          }
-          current = current[part]
-        }
-      })
-    })
-
-    const renderTree = (node: TreeNode, prefix = ''): string => {
-      let result = ''
-      const entries = Object.entries(node)
-      entries.forEach(([key, value], index) => {
-        const isLast = index === entries.length - 1
-        result += `${prefix}${isLast ? '└── ' : '├── '}${key}\n`
-        if (Object.keys(value).length > 0) {
-          result += renderTree(value, `${prefix}${isLast ? '    ' : '│   '}`)
-        }
-      })
-      return result
-    }
-
-    return renderTree(tree)
-  }
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setLoading(true)
@@ -77,17 +19,9 @@ export function GithubTreeGenerator() {
     setTree('')
 
     try {
-      const url = new URL(repoUrl)
-      const pathParts = url.pathname.split('/').filter(Boolean)
-      let [owner, repo] = pathParts
-      if (repo && repo.endsWith('.git')) {
-        repo = repo.replace(/\.git$/, '')
-      }
-      if (!owner || !repo) {
-        throw new Error('Invalid repository URL format.')
-      }
+      const { owner, repo } = parseGitHubUrl(repoUrl)
       const data = await fetchRepoStructure(owner, repo)
-      const generatedTree = generateTree(data, parseInt(depth))
+      const generatedTree = generateGitHubTreeStructure(data, parseInt(depth))
       setTree(generatedTree)
     } catch (err) {
       console.error(err)
@@ -109,6 +43,9 @@ export function GithubTreeGenerator() {
             placeholder="https://github.com/owner/repo"
             value={repoUrl}
             className="bg-background"
+            // TODO: Fix input bg color when selecting an auto-complete item
+            // Use input-webkit-autofill to ensure bg color doesn't change
+            autoComplete="off"
             onChange={(e) => setRepoUrl(e.target.value)}
             required
           />

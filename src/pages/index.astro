@@ -1,6 +1,6 @@
 ---
 import '../global.css';
-import { GithubTreeGenerator } from '@/components/github-tree-generator';
+import { GithubTreeGenerator } from '@/components/GithubTreeGenerator';
 ---
 
 <html lang="en"class="dark">
@@ -9,7 +9,7 @@ import { GithubTreeGenerator } from '@/components/github-tree-generator';
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
+		<title>GitHub Repository Tree Generator</title>
 	</head>
 	<body>
 		<GithubTreeGenerator client:load />
