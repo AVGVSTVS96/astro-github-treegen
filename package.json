@@ -1,5 +1,5 @@
 {
-  "name": "GitHub Repository Tree Generator",
+  "name": "github-repo-tree-generator",
   "type": "module",
   "version": "0.1.0",
   "scripts": {

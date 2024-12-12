@@ -56,7 +56,7 @@ export const generateGitHubTreeStructure = (data: GitHubTreeResponse, maxDepth: 
   const renderTree = (node: TreeNode, prefix = ''): string => {
     let result = ''
     const entries = Object.entries(node)
-    entries.forEach(([key, value], index) => {
+    entries.forEach(([key, value]: any, index: number) => {
       const isLast = index === entries.length - 1
       result += `${prefix}${isLast ? '└── ' : '├── '}${key}\n`
       if (Object.keys(value).length > 0) {
