@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { fetchRepoStructure, parseGitHubUrl, generateGitHubTreeStructure } from './github-tree-utils'
+import { CopyButton } from '@/components/CopyButton'
 
 export function GithubTreeGenerator() {
   const [repoUrl, setRepoUrl] = useState<string>('')
@@ -71,9 +72,15 @@ export function GithubTreeGenerator() {
       </form>
       {error && <p className="text-red-500 mt-4">{error}</p>}
       {tree && (
-        <pre className="mt-4 p-4 bg-zinc-900 leading-snug rounded overflow-x-auto">
-          <code>{tree}</code>
-        </pre>
+        <div className="mt-4 relative">
+          <pre className="p-4 bg-zinc-900 leading-snug rounded overflow-x-auto">
+            <CopyButton
+              text={tree}
+              className="absolute top-2 right-2 hover:bg-zinc-800"
+            />
+            <code>{tree}</code>
+          </pre>
+        </div>
       )}
     </div>
   )
